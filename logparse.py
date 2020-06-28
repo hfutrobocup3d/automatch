@@ -96,7 +96,10 @@ def getPathToToken(token, tree):
         if isinstance(tree[i], list):
             if token == str(tree[i]):
                 return [i]
-            ret = getPathToToken(token, tree[i])
+            try:
+                ret = getPathToToken(token, tree[i])
+            except RecursionError:
+                return
             if ret is not None:
                 path = [i]
                 path.extend(ret)

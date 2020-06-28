@@ -95,17 +95,17 @@ def start_half_match(t1_dir, t2_dir, server_started=True, log=True, log_rn='', l
             if int(float(info.get('time', 0))) >= last_t:
                 break
     except KeyboardInterrupt:
-        pass
+        return
     finally:
         left.kill()
         right.kill()
         if not server_started:
             server.kill()
 
-    if log and log_rn:
-        shutil.move(log_fn, 'log/'+log_rn)
-    else:
-        os.remove(log_fn)
+        if log and log_rn:
+            shutil.move(log_fn, 'log/'+log_rn)
+        else:
+            os.remove(log_fn)
 
     if info:
         return info['score']
@@ -116,25 +116,25 @@ def start_penalty():
 
 
 def full_match_with_log(t1_dir, t2_dir, penalty=True):
-    _uuid = uuid.uuid1().hex[:6]
     t1name, t2name = t1_dir.split("/")[-1], t2_dir.split("/")[-1]
+    ts = str(datetime.datetime.now())[:-7]
     rst1 = start_half_match(t1_dir, t2_dir, log=True, server_started=False,
-                            log_rn=f'{t1name}-VS-{t2name}-{_uuid}-firstHalf.log'
+                            log_rn=f'{t1name}-VS-{t2name}-{ts}-firstHalf.log'
                             )
     if rst1 is None:
         return
     rst2 = start_half_match(t2_dir, t1_dir, log=True, server_started=False,
-                            log_rn=f'{t2name}-VS-{t1name}-{_uuid}-secondHalf.log'
+                            log_rn=f'{t2name}-VS-{t1name}-{ts}-secondHalf.log'
                             )
     if rst2 is None:
         return
     t1score, t2score = rst1[0]+rst2[1], rst1[1]+rst2[0]
 
-    return ','.join([str(datetime.datetime.now()), t1name, t2name, str(t1score), str(t2score)])
+    return ','.join([ts, t1name, t2name, str(t1score), str(t2score)])
 
 
-if __name__ == "__main__":
-    teams = 'BahiaRT FCPortugal magmaOffenburg UTAustinVilla WrightOcean'.split()
+def cross_full_match():
+    teams = 'BahiaRT FCPortugal HFUTEngine ITAndroids magmaOffenburg UTAustinVilla WrightOcean'.split()
     base = '/home/shan/2019/'
     for i, a in enumerate(teams):
         for b in teams[i:]:
@@ -142,8 +142,26 @@ if __name__ == "__main__":
                 continue
             r = full_match_with_log(base+a, base+b)
             if r:
-                with open('output.txt', 'w') as f:
+                with open('output-cross.txt', 'a') as f:
                     print(r, file=f)
             else:
+                print('Match error!')
                 os._exit(1)
-    # start_half_match(a,b, False, log_rn=f'{a.split("/")[-1]}-VS-{b.split("/")[-1]}.log')
+
+
+def us_full_match():
+    teams = 'BahiaRT FCPortugal ITAndroids magmaOffenburg UTAustinVilla WrightOcean'.split()
+    base = '/home/shan/2019/'
+    a = 'HFUTEngine'
+    for i, b in enumerate(teams):
+        r = full_match_with_log(base+a, base+b)
+        if r:
+            with open('output-us.txt', 'a') as f:
+                print(r, file=f)
+        else:
+            print('Match error!')
+            os._exit(1)
+
+
+if __name__ == "__main__":
+    us_full_match()
