@@ -3,10 +3,10 @@ import subprocess
 import os
 import time
 import shutil
-import uuid
+import datetime
 from logparse import getInfo
 from kickoff import kickoff, kickoff_penalty
-import datetime
+from logger3d import *
 
 
 def folder_to_team(fn):
@@ -21,7 +21,7 @@ def start_server(kwargs=None):
         cmd = ['rcssserver3d', *cmd]
     else:
         cmd = ['rcssserver3d']
-    print(f'execute `{" ".join(cmd)}`')
+    D(f'execute `{" ".join(cmd)}`')
     return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
@@ -37,7 +37,7 @@ class NaoAgents:
     def start(self):
         time.sleep(1)
         proc = subprocess.Popen(
-            ['bash', 'start.sh', self.serverHost], cwd=self.dir, universal_newlines=True, bufsize=0
+            ['bash', 'start.sh', self.serverHost], cwd=self.dir, universal_newlines=True, bufsize=0, stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL
         )
         t = 0
         '''poll函数返回码：
@@ -46,10 +46,12 @@ class NaoAgents:
             2 子进程不存在
             -15 kill
             None 在运行'''
+        
+        I(f'Start team "{self.dir}"')
         while proc.poll() is None:
             time.sleep(1)
             t += 1
-        print(f'wait for {t} seconds')
+        D(f'wait for {t} seconds')
         return proc
 
     def start_penalty_kick(self):
@@ -73,6 +75,7 @@ def start_half_match(t1_dir, t2_dir, server_started=True, log=True, log_rn='', l
         server = log_mode_server() if log else start_server()
     left = NaoAgents(t1_dir)
     right = NaoAgents(t2_dir)
+    err = False
     try:
         left.start()
         time.sleep(1)
@@ -89,23 +92,31 @@ def start_half_match(t1_dir, t2_dir, server_started=True, log=True, log_rn='', l
             else:
                 c = 0
             if c > 10:
-                print(f'error with logFile!')
+                E(f'error with logFile!')
                 break
             assert type(info) is dict, f'type of info is {type(info)}'
             if int(float(info.get('time', 0))) >= last_t:
                 break
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as e:
+        I('Catch KeyboardInterrupt')
+        err = True
         return
     finally:
         left.kill()
         right.kill()
         if not server_started:
             server.kill()
-
-        if log and log_rn:
-            shutil.move(log_fn, 'log/'+log_rn)
-        else:
+        if err:
+            W(f'Catch Error, Remove "{log_fn}"')
             os.remove(log_fn)
+        else:
+            if log and log_rn:
+                fn = 'log/'+log_rn
+                I(f'Rename logfile ==> {fn}')
+                shutil.move(log_fn, fn)
+            else:
+                I(f'Remove "{log_fn}"')
+                os.remove(log_fn)
 
     if info:
         return info['score']
@@ -118,6 +129,7 @@ def start_penalty():
 def full_match_with_log(t1_dir, t2_dir, penalty=True):
     t1name, t2name = t1_dir.split("/")[-1], t2_dir.split("/")[-1]
     ts = str(datetime.datetime.now())[:-7]
+    I(f'Start match between "{t1name}", "{t2name}"')
     rst1 = start_half_match(t1_dir, t2_dir, log=True, server_started=False,
                             log_rn=f'{t1name}-VS-{t2name}-{ts}-firstHalf.log'
                             )
@@ -129,7 +141,7 @@ def full_match_with_log(t1_dir, t2_dir, penalty=True):
     if rst2 is None:
         return
     t1score, t2score = rst1[0]+rst2[1], rst1[1]+rst2[0]
-
+    I(f'Final result:\n{t1name} VS {t2name} ==> {t1score} : {t2score}')
     return ','.join([ts, t1name, t2name, str(t1score), str(t2score)])
 
 
@@ -145,7 +157,7 @@ def cross_full_match():
                 with open('output-cross.txt', 'a') as f:
                     print(r, file=f)
             else:
-                print('Match error!')
+                E('Match error!')
                 os._exit(1)
 
 
@@ -159,9 +171,10 @@ def us_full_match():
             with open('output-us.txt', 'a') as f:
                 print(r, file=f)
         else:
-            print('Match error!')
+            E('Match error!')
             os._exit(1)
 
 
 if __name__ == "__main__":
-    us_full_match()
+    while 1:
+        us_full_match()

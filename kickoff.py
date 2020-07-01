@@ -1,17 +1,19 @@
 import socket
 import struct
 import sys
+from logger3d import *
+
 
 assert float(sys.version[:3]) >= 3.7
 
-def kickoff(side='Left'):
+def kickoff(side='Left',host='localhost'):
     '''side = Left or Right'''
     msg = f'(playMode KickOff_{side})'
     L = len(msg)
     bm = struct.pack(f'!i{L}s', L, msg.encode())
-    print('send', bm)
+    I(f'send {bm}')
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-    s.connect(('localhost', 3200))
+    s.connect((host, 3200))
     s.send(bm)
 #    r = s.recv(2048)
     s.close()
