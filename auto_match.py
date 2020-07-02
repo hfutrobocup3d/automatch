@@ -6,7 +6,7 @@ import shutil
 import datetime
 from logparse import getInfo
 from kickoff import kickoff, kickoff_penalty
-from logger3d import *
+from logger3d import D, I, W, E
 
 
 def folder_to_team(fn):
@@ -37,7 +37,7 @@ class NaoAgents:
     def start(self):
         time.sleep(1)
         proc = subprocess.Popen(
-            ['bash', 'start.sh', self.serverHost], cwd=self.dir, universal_newlines=True, bufsize=0, stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL
+            ['bash', 'start.sh', self.serverHost], cwd=self.dir, universal_newlines=True, bufsize=0, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         t = 0
         '''poll函数返回码：
@@ -46,7 +46,7 @@ class NaoAgents:
             2 子进程不存在
             -15 kill
             None 在运行'''
-        
+
         I(f'Start team "{self.dir}"')
         while proc.poll() is None:
             time.sleep(1)
@@ -97,7 +97,7 @@ def start_half_match(t1_dir, t2_dir, server_started=True, log=True, log_rn='', l
             assert type(info) is dict, f'type of info is {type(info)}'
             if int(float(info.get('time', 0))) >= last_t:
                 break
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         I('Catch KeyboardInterrupt')
         err = True
         return
