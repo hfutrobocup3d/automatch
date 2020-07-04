@@ -1,6 +1,6 @@
 import requests
 from matchparam import oparam
-from logger3d import I, W
+from logger3d import I, W, E
 from auto_match import full_match_with_log
 import time
 
@@ -8,17 +8,26 @@ import time
 def get_one_task():
 
     rc = 0
-    url = 'http://'+oparam['masterHost']+'/onematch'
+    url = f"http://{oparam['masterHost']}:{oparam['masterPort']}/onematch"
     while rc != 200:
-        r = requests.get(url)
-        rc = r.status_code
-        if rc != 200:
-            W(f'[{rc}] {url}')
-            time.sleep(20)
+        try:
+            r = requests.get(url)
+            rc = r.status_code
+            if rc != 200:
+                W(f'[{rc}] {url}')
+                time.sleep(oparam['retrywait'])
+        except Exception:
+            E(f'Connection Error, retry after {oparam["retrywait"]}s')
+            time.sleep(oparam['retrywait'])
+            
     t1, t2 = r.text[1:-1].split(',')
     return t1, t2
 
 
 while True:
-    t1, t2 = get_one_task()
+    try:
+        t1, t2 = get_one_task()
+    except KeyboardInterrupt:
+        W('Servant catch SIGKIL, exit!')
+        break
     full_match_with_log(oparam['basedir']+'/'+t1, oparam['basedir']+'/'+t2)

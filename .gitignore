@@ -2,4 +2,4 @@ log
 *.log
 *.txt
 __pycache__
-
+.vscode

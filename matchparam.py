@@ -2,19 +2,8 @@ import yaml
 
 
 
-
-_params = '''
-basedir: /home/shan/2019
-mainteam: HFUTEngine
-
-masterHost: 192.168.2.194:8000
-
-
-# choose: [sequent, random]
-choose: sequent
-record-fn: output.txt
-'''
-
+with open('params.yaml') as f:
+    _params = f.read()
 
 optim_params = yaml.safe_load(_params)
 oparam = optim_params

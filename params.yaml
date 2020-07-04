@@ -1,0 +1,10 @@
+basedir: /home/shan/2019
+mainteam: HFUTEngine
+
+masterHost: 172.17.0.1
+masterPort: 8000
+retrywait: 30
+
+# choose: [sequent, random]
+choose: sequent
+record-fn: output.txt

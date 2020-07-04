@@ -63,7 +63,7 @@ class NaoAgents:
         return subprocess.Popen(f'./start_penalty_goalie.sh', cwd=self.dir, stdout=subprocess.PIPE)
 
     def kill(self):
-        time.sleep(1)
+        # time.sleep(1)
         return subprocess.Popen(f'./kill.sh', cwd=self.dir, stdout=subprocess.PIPE)
 
 
@@ -100,19 +100,19 @@ def start_half_match(t1_dir, t2_dir, server_started=True, log=True, log_rn='', l
     except KeyboardInterrupt:
         I('Catch KeyboardInterrupt')
         err = True
-        return
     finally:
         left.kill()
         right.kill()
         if not server_started:
             server.kill()
         if err:
-            W(f'Catch Error, Remove "{log_fn}"')
+            W(f'Catch Error, Remove "{log_fn}" and exit...')
             os.remove(log_fn)
+            os._exit(1)
         else:
             if log and log_rn:
                 fn = 'log/'+log_rn
-                I(f'Rename logfile ==> {fn}')
+                I(f'Rename {log_fn} ==> {fn}')
                 shutil.move(log_fn, fn)
             else:
                 I(f'Remove "{log_fn}"')
