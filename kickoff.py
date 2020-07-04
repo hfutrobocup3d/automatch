@@ -1,10 +1,8 @@
 import socket
 import struct
 import sys
-from logger3d import *
+from logger3d import I, L
 
-
-assert float(sys.version[:3]) >= 3.7
 
 def kickoff(side='Left',host='localhost'):
     '''side = Left or Right'''

@@ -3,6 +3,7 @@ from matchparam import oparam
 from logger3d import I, W, E
 from auto_match import full_match_with_log
 import time
+import os
 
 
 def get_one_task():
@@ -30,4 +31,12 @@ while True:
     except KeyboardInterrupt:
         W('Servant catch SIGKIL, exit!')
         break
-    full_match_with_log(oparam['basedir']+'/'+t1, oparam['basedir']+'/'+t2)
+    
+    try:
+        base_dir = os.environ['SRC_FOLDER']
+        I(f'Found ENV ARG SRC_FOLDER={base_dir}')
+    except KeyError:
+        base_dir = oparam['basedir']
+        I(f'Not Found ENV ARG SRC_FOLDER, set to {base_dir}')
+
+    full_match_with_log(base_dir+'/'+t1, base_dir+'/'+t2)
