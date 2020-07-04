@@ -4,6 +4,7 @@ import os
 import time
 import shutil
 import datetime
+import socket
 from logparse import getInfo
 from kickoff import kickoff, kickoff_penalty
 from logger3d import D, I, W, E
@@ -142,7 +143,7 @@ def full_match_with_log(t1_dir, t2_dir, penalty=True):
         return
     t1score, t2score = rst1[0]+rst2[1], rst1[1]+rst2[0]
     I(f'Final result:\n{t1name} VS {t2name} ==> {t1score} : {t2score}')
-    return ','.join([ts, t1name, t2name, str(t1score), str(t2score)])
+    return ','.join([ts, socket.gethostname(), t1name, t2name, str(t1score), str(t2score)])
 
 
 def cross_full_match():

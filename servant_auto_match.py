@@ -39,4 +39,11 @@ while True:
         base_dir = oparam['basedir']
         I(f'Not Found ENV ARG SRC_FOLDER, set to {base_dir}')
 
-    full_match_with_log(base_dir+'/'+t1, base_dir+'/'+t2)
+    r = full_match_with_log(base_dir+'/'+t1, base_dir+'/'+t2)
+    if r:
+        with open(oparam['record-fn'], 'a') as f:
+            print(r, file=f)
+        I(f'')
+    else:
+        E('Match error!')
+        os._exit(1)
